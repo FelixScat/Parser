@@ -13,15 +13,28 @@ public typealias TokenParser<T> = Parser<T, [Token]>
 extension Parser where Input == [Token] {
     
     public var repeats: TokenParser<[Output]> {
-        return TokenParser<Output>(parse: { (tokens) -> ParseResult<([Output], [Token])> in
+        return TokenParser<[Output]>(parse: { (tokens) -> ParseResult<([Output], [Token])> in
             var results = [Output]()
             var list = tokens
-            while list
+            while list.count > 0 {
+                switch self.parse(list) {
+                case .success(let (token, rest)):
+                    results.append(token)
+                    list = rest
+                case .failure(let error):
+                    #if DEBUG
+                    print(error)
+                    #endif
+                    list = Array(list.dropFirst())
+                    continue
+                }
+            }
+            return .success((results, list))
         })
     }
 }
 
-public func tokenParser(_ type: TokenType) -> TokenParser<Token> {
+public func parser_token(_ type: TokenType) -> TokenParser<Token> {
     return TokenParser(parse: { (tks) -> ParseResult<(Token, [Token])> in
         guard let token = tks.first, token.type == type else {
             return .failure(.notMatch)
