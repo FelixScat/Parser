@@ -22,10 +22,10 @@ extension Parser where Input == [Token] {
                 case .success(let (token, rest)):
                     results.append(token)
                     list = rest
-                case .failure(let error):
-                    #if DEBUG
-                    print(error)
-                    #endif
+                case .failure(_):
+                    //                    #if DEBUG
+                    //                    print(error)
+                    //                    #endif
                     list = Array(list.dropFirst())
                     continue
                 }
@@ -44,15 +44,9 @@ public func parser_token(_ type: TokenType) -> TokenParser<Token> {
     })
 }
 
-func => <T, U> (consumer: Parser<T, [Token]>, f: @escaping (T) -> U) -> Parser<U, [Token]> {
-    return consumer.map(f)
+func => <T, U> (p: Parser<T, [Token]>, f: @escaping (T) -> U) -> Parser<U, [Token]> {
+    return p.map(f)
 }
-
-//precedencegroup BetweenApplicativeAndSequence {
-//    associativity: left
-//    higherThan: RunesApplicativePrecedence
-//    lowerThan: NilCoalescingPrecedence
-//}
 
 infix operator => : RunesApplicativeSequencePrecedence
 

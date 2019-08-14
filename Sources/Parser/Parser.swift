@@ -50,10 +50,10 @@ public struct Parser<Output, Input: Sequence> {
         switch parse(input) {
         case .success(let (output, _)):
             return output
-        case .failure(let error):
-            #if DEBUG
-            print(error)
-            #endif
+        case .failure(_):
+//            #if DEBUG
+//            print(error)
+//            #endif
             return nil
         }
     }

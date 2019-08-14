@@ -14,3 +14,7 @@ public struct ObjCInterface {
 public struct ObjCImplement {
     var name = ""
 }
+
+public struct ObjCMethod {
+    var name = ""
+}
