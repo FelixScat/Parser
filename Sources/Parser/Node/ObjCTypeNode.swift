@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+public struct ObjCInterface {
+    var name: String
+}
+
+public struct ObjCImplement {
+    var name = ""
+}

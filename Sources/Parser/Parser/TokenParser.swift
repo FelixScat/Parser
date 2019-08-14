@@ -7,6 +7,7 @@
 
 import Foundation
 import LLexer
+import Runes
 
 public typealias TokenParser<T> = Parser<T, [Token]>
 
@@ -43,4 +44,15 @@ public func parser_token(_ type: TokenType) -> TokenParser<Token> {
     })
 }
 
+func => <T, U> (consumer: Parser<T, [Token]>, f: @escaping (T) -> U) -> Parser<U, [Token]> {
+    return consumer.map(f)
+}
+
+//precedencegroup BetweenApplicativeAndSequence {
+//    associativity: left
+//    higherThan: RunesApplicativePrecedence
+//    lowerThan: NilCoalescingPrecedence
+//}
+
+infix operator => : RunesApplicativeSequencePrecedence
 
