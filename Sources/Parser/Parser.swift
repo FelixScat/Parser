@@ -36,6 +36,7 @@ extension Result {
 /// - unknow: unknow reason
 public enum ParseError: Error {
     case notMatch
+    case fileEnd
     case unknow
 }
 
@@ -59,6 +60,12 @@ public struct Parser<Output, Input: Sequence> {
 }
 
 extension Parser {
+    
+    static func just(_ result: Output) -> Parser<Output, Input> {
+        return Parser(parse: { (input) -> Result<(Output, Input), Error> in
+            return .success((result, input))
+        })
+    }
     
     func map<U>(_ f: @escaping (Output) -> U) -> Parser<U, Input> {
         return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
@@ -110,6 +117,7 @@ extension Parser {
             return .success(r)
         })
     }
+    
 }
 
 // 顺序执行保留右值
@@ -142,6 +150,11 @@ func keepLeft<T, U, S>(_ l: Parser<T, S>, r: Parser<U, S>) -> Parser<T, S> {
     })
 }
 
+/// 将parser传入返回为新的parser
+func lazy<T, U>(_ parser: @autoclosure @escaping () -> Parser<T, U>) -> Parser<T, U> {
+    return Parser<T, U> { parser().parse($0) }
+}
+
 /// Map
 func <^> <T, U, S> (f: @escaping (T) -> U, c: Parser<T, S>) -> Parser<U, S> {
     return c.map(f)
@@ -167,5 +180,66 @@ func <* <T, U, S>(l: Parser<T, S>, r: Parser<U, S>) -> Parser<T, S> {
     return keepLeft(l, r: r)
 }
 
+extension Parser {
 
-
+    
+    /// 在parse成功后不消耗输入
+    func lookAhead() -> Parser<Output, Input> {
+        return Parser(parse: { (input) -> Result<(Output, Input), Error> in
+            switch self.parse(input) {
+            case .success(let (result, _)):
+                return .success((result, input))
+            case .failure(let error):
+                return .failure(error)
+            }
+        })
+    }
+    
+    /// 返回相反的parse，成功时result为nil
+    func not() -> Parser<Output?, Input> {
+        return Parser<Output?, Input>(parse: { (input) -> Result<(Output?, Input), Error> in
+            switch self.parse(input) {
+            case .success(_):
+                return .failure(ParseError.unknow)
+            case .failure(_):
+                return .success((nil, input))
+            }
+        })
+    }
+    
+    func many() -> Parser<[Output], Input> {
+        return Parser<[Output], Input>(parse: { (input) -> Result<([Output], Input), Error> in
+            var results = [Output]()
+            var rest = input
+            while true {
+                switch self.parse(rest) {
+                case .success(let (result, left)):
+                    results.append(result)
+                    rest = left
+                case .failure(_):
+                    return .success((results.compactMap{$0}, rest))
+                }
+            }
+        })
+    }
+    
+    func Least1() -> Parser<[Output], Input> {
+        return Parser<[Output], Input>(parse: { (input) -> Result<([Output], Input), Error> in
+            var results = [Output]()
+            var rest = input
+            while true {
+                switch self.parse(rest) {
+                case .success(let (result, left)):
+                    results.append(result)
+                    rest = left
+                case .failure(let error):
+                    if results.count == 0 {
+                        return .failure(error)
+                    }else {
+                        return .success((results.compactMap{$0}, rest))
+                    }
+                }
+            }
+        })
+    }
+}
