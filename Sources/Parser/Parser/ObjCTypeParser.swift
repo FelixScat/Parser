@@ -116,7 +116,7 @@ public var parser_OCMethodDefine: TokenParser<ObjCMethod> {
 
 public var parser_OCInvoker: TokenParser<ObjCInvoker> {
     
-    let toOtherInvoker: (ObjCInvoke) ->ObjCInvoker = { .otherInvoke($0) }
+    let toOtherInvoker: (ObjCInvoke) -> ObjCInvoker = { .otherInvoke($0) }
     let toVariable: (Token) -> ObjCInvoker = { .variable($0.text) }
     
     return lazy(parser_OCInvoke) => toOtherInvoker
