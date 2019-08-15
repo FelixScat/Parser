@@ -37,3 +37,27 @@ public struct ObjCParam {
     /// 形参名
     var formalName: String
 }
+
+/// 方法调用者
+public indirect enum ObjCInvoker {
+    case variable(String)
+    case otherInvoke(ObjCInvoke)
+}
+
+/// 方法调用的参数
+public struct ObjCInvokeParam {
+    var name: String
+    var invokes: [ObjCInvoke]
+}
+
+/// 方法调用
+public struct ObjCInvoke {
+    var invoker: ObjCInvoker
+    var params: [ObjCInvokeParam]
+}
+
+
+
+
+
+

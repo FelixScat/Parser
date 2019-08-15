@@ -114,6 +114,25 @@ public var parser_OCMethodDefine: TokenParser<ObjCMethod> {
     return parser
 }
 
+public var parser_OCInvoker: TokenParser<ObjCInvoker> {
+    
+    let toOtherInvoker: (ObjCInvoke) ->ObjCInvoker = { .otherInvoke($0) }
+    let toVariable: (Token) -> ObjCInvoker = { .variable($0.text) }
+    
+    return lazy(parser_OCInvoke) => toOtherInvoker
+        <|> p_name => toVariable
+}
+
+public var parser_OCInvokeParam: TokenParser<ObjCInvokeParam> {
+    return TokenParser.just(ObjCInvokeParam(name: "1", invokes: []))
+}
+
+public var parser_OCInvoke: TokenParser<ObjCInvoke> {
+    return TokenParser.just(ObjCInvoke(invoker: ObjCInvoker.variable("a"), params: [ObjCInvokeParam(name: "1", invokes: [])]))
+}
+
+
+
 extension Parser {
     
 }
