@@ -11,8 +11,8 @@ public enum ParseResult<T> {
 
 
 // MARK: - optional
-extension ParseResult {
-    var value: T? {
+extension Result {
+    var value: Success? {
         switch self {
         case .success(let result):
             return result
@@ -20,8 +20,7 @@ extension ParseResult {
             return nil
         }
     }
-    
-    var error: ParseError? {
+    var error: Failure? {
         switch self {
         case .success(_):
             return nil
@@ -44,7 +43,7 @@ public enum ParseError: Error {
 /// Parser
 public struct Parser<Output, Input: Sequence> {
     
-    public var parse: (Input) -> ParseResult<(Output, Input)>
+    public var parse: (Input) -> Result<(Output, Input), Error>
     
     public func run(_ input: Input) -> Output? {
         switch parse(input) {
@@ -62,7 +61,7 @@ public struct Parser<Output, Input: Sequence> {
 extension Parser {
     
     func map<U>(_ f: @escaping (Output) -> U) -> Parser<U, Input> {
-        return Parser<U, Input>(parse: { (input) -> ParseResult<(U, Input)> in
+        return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
             switch self.parse(input) {
             case .success(let (result, rest)):
                 return .success((f(result), rest))
@@ -73,21 +72,21 @@ extension Parser {
     }
     
     func apply<U>(_ parser: Parser<(Output) -> U, Input>) -> Parser<U, Input> {
-        return Parser<U, Input>(parse: { (input) -> ParseResult<(U, Input)> in
+        return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
             let lResult = parser.parse(input)
             guard let l = lResult.value else {
-                return .failure(lResult.error ?? .unknow)
+                return .failure(lResult.error ?? ParseError.unknow)
             }
             let rResult = self.parse(l.1)
             guard let r = rResult.value else {
-                return .failure(rResult.error ?? .unknow)
+                return .failure(rResult.error ?? ParseError.unknow)
             }
             return .success((l.0(r.0), r.1))
         })
     }
     
     func or(_ parser: Parser<Output, Input>) -> Parser<Output, Input> {
-        return Parser<Output, Input>(parse: { (input) -> ParseResult<(Output, Input)> in
+        return Parser<Output, Input>(parse: { (input) -> Result<(Output, Input), Error> in
             let result = self.parse(input)
             switch result {
             case .success(_):
@@ -99,14 +98,14 @@ extension Parser {
     }
     
     func rightSequence<U>(_ parser: Parser<U, Input> ) -> Parser<U, Input> {
-        return Parser<U, Input>(parse: { (input) -> ParseResult<(U, Input)> in
+        return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
             let lResult = self.parse(input)
             guard let l = lResult.value else {
-                return .failure(lResult.error ?? .unknow)
+                return .failure(lResult.error ?? ParseError.unknow)
             }
             let rResult = parser.parse(l.1)
             guard let r = rResult.value else {
-                return .failure(rResult.error ?? .unknow)
+                return .failure(rResult.error ?? ParseError.unknow)
             }
             return .success(r)
         })
@@ -115,14 +114,14 @@ extension Parser {
 
 // 顺序执行保留右值
 func keepRight<T, U, S>(_ l: Parser<T, S>, r: Parser<U, S>) -> Parser<U, S> {
-    return Parser<U, S>(parse: { (input) -> ParseResult<(U, S)> in
+    return Parser<U, S>(parse: { (input) -> Result<(U, S), Error> in
         let lResult = l.parse(input)
         guard let l = lResult.value else {
-            return .failure(lResult.error ?? .unknow)
+            return .failure(lResult.error ?? ParseError.unknow)
         }
         let rResult = r.parse(l.1)
         guard let r = rResult.value else {
-            return .failure(rResult.error ?? .unknow)
+            return .failure(rResult.error ?? ParseError.unknow)
         }
         return .success(r)
     })
@@ -130,14 +129,14 @@ func keepRight<T, U, S>(_ l: Parser<T, S>, r: Parser<U, S>) -> Parser<U, S> {
 
 // 顺序执行保留左值
 func keepLeft<T, U, S>(_ l: Parser<T, S>, r: Parser<U, S>) -> Parser<T, S> {
-    return Parser<T, S>(parse: { (input) -> ParseResult<(T, S)> in
+    return Parser<T, S>(parse: { (input) -> Result<(T, S), Error> in
         let lResult = l.parse(input)
         guard let l = lResult.value else {
-            return .failure(lResult.error ?? .unknow)
+            return .failure(lResult.error ?? ParseError.unknow)
         }
         let rResult = r.parse(l.1)
         guard let r = rResult.value else {
-            return .failure(rResult.error ?? .unknow)
+            return .failure(rResult.error ?? ParseError.unknow)
         }
         return .success((l.0, r.1))
     })
