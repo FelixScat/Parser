@@ -49,7 +49,6 @@ public func parser_token(_ type: TokenType) -> TokenParser<Token> {
     })
 }
 
-
 /// 返回包裹在 l & r 之前的tokens
 public func tokens(enclosedBy l: TokenParser<Token>, r: TokenParser<Token>) -> TokenParser<[Token]> {
     let content = l.lookAhead() *> lazy(tokens(enclosedBy: l, r: r))
@@ -63,6 +62,17 @@ func tokens(inside l: TokenParser<Token>, r: TokenParser<Token>) -> TokenParser<
     return tokens(enclosedBy: l, r: r).map{
         Array($0.dropFirst().dropLast())
     }
+}
+
+func tokens(until p: TokenParser<Token>) -> TokenParser<[Token]> {
+    return (p.not() *> p_anyToken).many()
+}
+
+
+/// 匹配任意token（不被括号和尖括号包裹）直到p
+func openTokens(until p: TokenParser<Token>) -> TokenParser<[Token]> {
+    return {$0.flatMap{$0}}
+        <^> (p.not() *> (p_enclosed <|> p_anyToken.map{[$0]})).many()
 }
 
 func => <T, U> (p: Parser<T, [Token]>, f: @escaping (T) -> U) -> Parser<U, [Token]> {

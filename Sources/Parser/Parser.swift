@@ -67,11 +67,27 @@ extension Parser {
         })
     }
     
+    func between<L, R>(_ open: Parser<L, Input>, _ close: Parser<R, Input>) -> Parser<Output, Input> {
+        return open *> self <* close
+    }
+    
     func map<U>(_ f: @escaping (Output) -> U) -> Parser<U, Input> {
         return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
             switch self.parse(input) {
             case .success(let (result, rest)):
                 return .success((f(result), rest))
+            case .failure(let error):
+                return .failure(error)
+            }
+        })
+    }
+    
+    func flatMap<U>(_ f: @escaping (Output) -> Parser<U, Input>) -> Parser<U, Input> {
+        return Parser<U, Input>(parse: { (input) -> Result<(U, Input), Error> in
+            switch self.parse(input) {
+            case .success(let (result, rest)):
+                let p = f(result)
+                return p.parse(rest)
             case .failure(let error):
                 return .failure(error)
             }

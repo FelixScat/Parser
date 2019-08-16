@@ -7,35 +7,45 @@
 
 import Foundation
 
+public struct ObjCProperty {
+    public var decorate: String?
+    public var type = ""
+//    public var isObjectType = false
+    public var propertyName = ""
+}
 
 /// ObjC 接口
 public struct ObjCInterface {
-    var name: String
+    public var name: String
+    public var properties: [ObjCProperty] = []
 }
 
 /// ObjC 实现
 public struct ObjCImplement {
-    var name = ""
+    public var name = ""
+    public var methods: [ObjCMethod] = []
 }
 
 /// ObjC 方法
 public struct ObjCMethod {
     /// 是否为静态方法
-    var statically = false
+    public var statically = false
     /// 返回类型
-    var returnType = ""
+    public var returnType = ""
     /// 参数列表
-    var params: [ObjCParam] = []
+    public var params: [ObjCParam] = []
+    /// 方法体中的方法调用
+    public var invokes: [ObjCInvoke] = []
 }
 
 /// ObjC 方法参数
 public struct ObjCParam {
     /// 参数名
-    var name: String
+    public var name: String
     /// 参数类型
-    var type: String
+    public var type: String
     /// 形参名
-    var formalName: String
+    public var formalName: String
 }
 
 /// 方法调用者
@@ -46,14 +56,16 @@ public indirect enum ObjCInvoker {
 
 /// 方法调用的参数
 public struct ObjCInvokeParam {
-    var name: String
-    var invokes: [ObjCInvoke]
+    /// 参数名
+    public var name: String
+    /// 参数中的其他方法调用
+    public var invokes: [ObjCInvoke]
 }
 
 /// 方法调用
 public struct ObjCInvoke {
-    var invoker: ObjCInvoker
-    var params: [ObjCInvokeParam]
+    public var invoker: ObjCInvoker
+    public var params: [ObjCInvokeParam]
 }
 
 
