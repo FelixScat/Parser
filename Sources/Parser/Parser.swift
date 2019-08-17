@@ -67,6 +67,17 @@ extension Parser {
         })
     }
     
+    func optional() -> Parser<Output?, Input> {
+        return Parser<Output?, Input>(parse: { (input) -> Result<(Output?, Input), Error> in
+            switch self.parse(input) {
+            case .success(let (result, rest)):
+                return .success((result, rest))
+            case .failure(_):
+                return .success((nil, input))
+            }
+        })
+    }
+    
     func between<L, R>(_ open: Parser<L, Input>, _ close: Parser<R, Input>) -> Parser<Output, Input> {
         return open *> self <* close
     }

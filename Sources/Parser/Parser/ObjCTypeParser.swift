@@ -132,7 +132,7 @@ public func joined(by str: String) -> ([Token]) -> String {
 }
 
 /// parser for ObjCInterface
-public var parser_OCInterface: TokenParser<[ObjCInterface]> {
+public var parser_OCInterfaces: TokenParser<[ObjCInterface]> {
     
     let parser = curry(ObjCInterface.init)
         <^> p_ocinterface *> p_name => string
@@ -247,10 +247,8 @@ public var parser_OCInvokes: TokenParser<[ObjCInvoke]> {
 
 public var parser_OCProperty: TokenParser<ObjCProperty> {
     
-    let pt = curry(ObjCProperty.init)
+    return curry(ObjCProperty.init)
         <^> p_ocproperty *> tokens(inside: p_openParen, r: p_closeParen) => joined(by: " ")
         <*> p_name => string
-        <*> p_name => string <* tokens(until: p_semicolon)
-        //        <*> tokens(until: p_semicolon)
-    return pt
+        <*> ( {$0.last?.text ?? "" } <^> tokens(until: p_semicolon))
 }

@@ -7,11 +7,17 @@
 
 import Foundation
 
+
+/// ObjC 成员属性
 public struct ObjCProperty {
-    public var decorate: String?
+    /// 修饰符
+    public var decorate = ""
+    /// 类型
     public var type = ""
 //    public var isObjectType = false
+    /// 属性名称
     public var propertyName = ""
+//    public var name = ""
 }
 
 /// ObjC 接口
