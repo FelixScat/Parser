@@ -136,6 +136,7 @@ public var parser_OCInterface: TokenParser<ObjCInterface> {
     
     return curry(ObjCInterface.init)
         <^> p_ocinterface *> p_name => string
+        <*> p_colon *> p_name  => string
         <*> tokens(until: p_ocEnd).map{
             parser_OCProperty.repeats.run($0) ?? []
     }

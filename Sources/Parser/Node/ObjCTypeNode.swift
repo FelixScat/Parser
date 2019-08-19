@@ -11,16 +11,17 @@ import Foundation
 /// ObjC 成员属性
 public struct ObjCProperty {
     /// 修饰符
-    public var decorate = ""
+    public var decorate: String
     /// 类型
-    public var type = ""
+    public var type: String
     /// 属性名称
-    public var propertyName = ""
+    public var propertyName: String
 }
 
 /// ObjC 接口
 public struct ObjCInterface {
     public var name: String
+    public var superClass: String
     public var properties: [ObjCProperty] = []
 }
 
