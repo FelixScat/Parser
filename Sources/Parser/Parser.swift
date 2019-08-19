@@ -49,11 +49,14 @@ public struct Parser<Output, Input: Sequence> {
     public func run(_ input: Input) -> Output? {
         switch parse(input) {
         case .success(let (output, _)):
+            #if DEBUG
+            print("Parse Success: \(output)")
+            #endif
             return output
-        case .failure(_):
-//            #if DEBUG
-//            print(error)
-//            #endif
+        case .failure(let error):
+            #if DEBUG
+            print("Parse Failed: \(error)")
+            #endif
             return nil
         }
     }

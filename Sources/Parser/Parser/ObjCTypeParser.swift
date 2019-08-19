@@ -132,15 +132,13 @@ public func joined(by str: String) -> ([Token]) -> String {
 }
 
 /// parser for ObjCInterface
-public var parser_OCInterfaces: TokenParser<[ObjCInterface]> {
+public var parser_OCInterface: TokenParser<ObjCInterface> {
     
-    let parser = curry(ObjCInterface.init)
+    return curry(ObjCInterface.init)
         <^> p_ocinterface *> p_name => string
         <*> tokens(until: p_ocEnd).map{
             parser_OCProperty.repeats.run($0) ?? []
     }
-    
-    return parser.repeats
 }
 
 /// parser for ObjCImplement

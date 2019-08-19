@@ -14,10 +14,8 @@ public struct ObjCProperty {
     public var decorate = ""
     /// 类型
     public var type = ""
-//    public var isObjectType = false
     /// 属性名称
     public var propertyName = ""
-//    public var name = ""
 }
 
 /// ObjC 接口
