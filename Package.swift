@@ -16,7 +16,8 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/thoughtbot/Runes", from: "5.0.0"),
         .package(url: "https://github.com/thoughtbot/Curry", from: "4.0.2"),
-        .package(path: "../LLexer"),
+        .package(url: "https://github.com/FelixScat/LLexer", from: "0.0.1"),
+        // .package(path: "../LLexer"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
